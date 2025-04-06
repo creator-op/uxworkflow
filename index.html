@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium UI/UX Process Navigator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mark.js/dist/mark.min.js"></script>
+</head>
+<body class="light-mode">
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-compass-drafting sidebar-logo"></i>
+                <h2>Process Navigator</h2>
+            </div>
+
+            <div class="project-controls">
+                 <button id="export-json-btn" class="control-btn" title="Export Project Data"><i class="fa-solid fa-file-export"></i> Export JSON</button>
+                 <button id="import-json-btn" class="control-btn" title="Import Project Data"><i class="fa-solid fa-file-import"></i> Import JSON</button>
+                 <input type="file" id="import-file-input" accept=".json" style="display: none;">
+            </div>
+
+            <div class="progress-container">
+                <label for="progress-bar"><i class="fa-solid fa-bars-progress"></i> Overall Project Progress</label>
+                <div class="progress-bar-wrapper">
+                    <div id="progress-bar-fill"></div>
+                </div>
+                <span id="progress-text">0% Complete (0/0)</span>
+            </div>
+
+            <ul class="nav-list">
+                 <li><a href="#phase-1" class="nav-link active" data-phase="phase-1"><i class="fa-solid fa-magnifying-glass"></i> Define & Discover <span class="phase-progress" id="phase-1-progress">0%</span></a></li>
+                 <li><a href="#phase-2" class="nav-link" data-phase="phase-2"><i class="fa-solid fa-lightbulb"></i> Ideate & Structure <span class="phase-progress" id="phase-2-progress">0%</span></a></li>
+                 <li><a href="#phase-3" class="nav-link" data-phase="phase-3"><i class="fa-solid fa-pen-ruler"></i> Design & Prototype <span class="phase-progress" id="phase-3-progress">0%</span></a></li>
+                 <li><a href="#phase-4" class="nav-link" data-phase="phase-4"><i class="fa-solid fa-vial-circle-check"></i> Test & Iterate <span class="phase-progress" id="phase-4-progress">0%</span></a></li>
+                 <li><a href="#phase-5" class="nav-link" data-phase="phase-5"><i class="fa-solid fa-file-arrow-up"></i> Finalize & Present <span class="phase-progress" id="phase-5-progress">0%</span></a></li>
+            </ul>
+
+            <div class="sidebar-actions">
+                 <button id="generate-pdf-btn" class="action-btn primary-alt-action" title="Generate PDF Report"><i class="fa-solid fa-file-pdf"></i> Generate PDF</button>
+                 <button id="generate-html-btn" class="action-btn primary-alt-action" title="Generate HTML Report"><i class="fa-solid fa-file-code"></i> Generate HTML</button>
+                 <button id="clear-data-btn" class="action-btn secondary-action" title="Clear All Data for Current Project"><i class="fa-solid fa-trash-can"></i> Clear Project</button>
+            </div>
+
+            <div class="sidebar-footer">
+                <button id="dark-mode-toggle" class="theme-toggle-btn" title="Toggle Light/Dark Mode">
+                    <i class="fa-solid fa-sun light-icon"></i>
+                    <i class="fa-solid fa-moon dark-icon"></i>
+                </button>
+                <p class="storage-note" title="Data is saved locally in your browser only. Use Export JSON for backups or moving between devices.">
+                    <i class="fa-solid fa-database"></i> Local Storage
+                    <i class="fa-solid fa-circle-info help-icon" id="storage-help-icon"></i>
+                </p>
+            </div>
+        </nav>
+
+        <main class="content-area" id="content-area">
+            <header class="content-header">
+                <div class="input-group project-name-group">
+                     <label for="project-name"><i class="fa-solid fa-clipboard-list"></i></label>
+                     <input type="text" id="project-name" placeholder="Enter Project Title...">
+                </div>
+                <div class="header-controls">
+                    <div class="search-container">
+                        <input type="search" id="search-input" placeholder="Search notes...">
+                        <button id="search-clear-btn" class="search-clear-btn" title="Clear Search"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div id="save-indicator" class="save-indicator">
+                        <i class="fa-solid fa-check-circle"></i> Auto-saved
+                    </div>
+                </div>
+            </header>
+
+             <div class="project-scope-section">
+                 <label for="project-scope-notes"><i class="fa-solid fa-bullseye-pointer"></i> Project Scope & Methodology Notes</label>
+                 <textarea id="project-scope-notes" rows="4" placeholder="Define the overall scope, constraints, and methodology for this specific project..."></textarea>
+             </div>
+
+            <section id="phase-1" class="phase-section active-section">
+                 <h2 class="phase-title"><i class="fa-solid fa-magnifying-glass"></i> Phase 1: Define & Discover</h2>
+                 <p class="phase-description">Understand the context, define the problem, know the users, and set clear goals.</p>
+
+                 <div class="step" data-step-id="1.1" data-step-title="Brief Deconstruction & Stakeholder Input">
+                     <div class="step-header">
+                         <input type="checkbox" id="step-1.1-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-1.1-check"><i class="fa-solid fa-file-lines"></i> 1.1 Brief Deconstruction & Stakeholder Input</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-1.1"><i class="fa-solid fa-circle-info"></i></button>
+                     </div>
+                     <div class="tip-content" id="tip-1.1" style="display: none;">
+                         <p><strong>Brief Analysis:</strong> Break down the project request. Identify core objectives, constraints (time, budget, tech), target audience, key deliverables. Ask "Why?" repeatedly to uncover underlying needs. What assumptions are being made?</p>
+                         <p><strong>Stakeholder Interviews:</strong> Identify key stakeholders (product managers, engineers, marketing, sales, executives). Prepare questions focusing on business goals, success metrics, perceived user needs, technical feasibility, market context, and potential risks. Synthesize findings.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="brief-text">Brief Analysis & Key Takeaways:</label>
+                         <textarea id="brief-text" rows="5" placeholder="Summarize brief highlights, objectives, constraints, assumptions..."></textarea>
+                     </div>
+                     <div class="input-group">
+                         <label for="stakeholder-input">Stakeholder Interview Summary:</label>
+                         <textarea id="stakeholder-input" rows="5" placeholder="Key insights, quotes, agreed goals, constraints from stakeholders..."></textarea>
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="1.2" data-step-title="Define the Problem Statement(s)">
+                    <div class="step-header">
+                       <input type="checkbox" id="step-1.2-check" class="step-checkbox" title="Mark as complete">
+                        <h3><label for="step-1.2-check"><i class="fa-solid fa-bullseye-arrow"></i> 1.2 Define the Problem Statement(s)</label></h3>
+                        <button class="tip-toggle-btn" data-tip-target="tip-1.2"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                    <div class="tip-content" id="tip-1.2" style="display: none;">
+                         <p>Based on initial understanding, articulate the core problem(s) this project aims to solve *from the user's perspective*. Use the format: "[Specific User Type] needs a way to [Perform Action/Achieve Goal] because [Insight/Pain Point/Barrier]". Ensure it's concise, actionable, and research-informed (even if initial research).</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="problem-statement">Problem Statement(s):</label>
+                         <textarea id="problem-statement" rows="4" placeholder="Clearly articulate the core user problem(s)..."></textarea>
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="1.3" data-step-title="Set Goals & Success Metrics (SMART/HEART)">
+                    <div class="step-header">
+                        <input type="checkbox" id="step-1.3-check" class="step-checkbox" title="Mark as complete">
+                        <h3><label for="step-1.3-check"><i class="fa-solid fa-flag-checkered"></i> 1.3 Set Goals & Success Metrics (SMART/HEART)</label></h3>
+                        <button class="tip-toggle-btn" data-tip-target="tip-1.3"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-1.3" style="display: none;">
+                         <p><strong>SMART Goals:</strong> Define Specific, Measurable, Achievable, Relevant, Time-bound goals for the project. What constitutes success?</p>
+                         <p><strong>HEART Framework (Optional):</strong> Consider measuring Happiness, Engagement, Adoption, Retention, Task Success. Define specific metrics for each relevant category.</p>
+                         <p><strong>Examples:</strong> Increase sign-up conversion by 15% in Q3. Reduce average task completion time for X by 20%. Achieve a System Usability Scale (SUS) score of 80+. Decrease support tickets related to Y by 25%.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="project-goals">Project Goals (User & Business):</label>
+                         <textarea id="project-goals" rows="4" placeholder="List specific user outcomes and business objectives..."></textarea>
+                     </div>
+                     <div class="input-group">
+                        <label for="success-metrics">Success Metrics (KPIs):</label>
+                        <textarea id="success-metrics" rows="4" placeholder="How will goals be measured? e.g., Metric, Target Value, Timeframe..."></textarea>
+                    </div>
+                </div>
+
+                <div class="step" data-step-id="1.4" data-step-title="Competitive & Comparative Analysis">
+                    <div class="step-header">
+                        <input type="checkbox" id="step-1.4-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-1.4-check"><i class="fa-solid fa-chess-board"></i> 1.4 Competitive & Comparative Analysis</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-1.4"><i class="fa-solid fa-circle-info"></i></button>
+                     </div>
+                      <div class="tip-content" id="tip-1.4" style="display: none;">
+                         <p><strong>Direct Competitors:</strong> Products offering very similar solutions to the same audience. Analyze their features, UX/UI, pricing, strengths, weaknesses, user reviews.</p>
+                         <p><strong>Indirect/Comparative:</strong> Products solving similar *problems* but perhaps differently or for a different audience. Look for inspiration in interaction patterns, onboarding, specific features.</p>
+                         <p><strong>Output:</strong> SWOT analysis (Strengths, Weaknesses, Opportunities, Threats), feature comparison matrix, UI/UX pattern observations, potential differentiators.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="competitor-analysis">Analysis Summary & Opportunities:</label>
+                         <textarea id="competitor-analysis" rows="6" placeholder="Key findings, SWOT points, feature gaps, UI patterns, differentiation ideas..."></textarea>
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="1.5" data-step-title="User Research Plan">
+                    <div class="step-header">
+                        <input type="checkbox" id="step-1.5-check" class="step-checkbox" title="Mark as complete">
+                        <h3><label for="step-1.5-check"><i class="fa-solid fa-map-location-dot"></i> 1.5 User Research Plan</label></h3>
+                        <button class="tip-toggle-btn" data-tip-target="tip-1.5"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                    <div class="tip-content" id="tip-1.5" style="display: none;">
+                         <p><strong>Objectives:</strong> What specific questions do you need to answer about user behaviors, needs, pain points, context? Link back to project goals and assumptions.</p>
+                         <p><strong>Participants:</strong> Define target user segments. Create screener questions to recruit appropriate participants (aim for 5-8 for qualitative interviews).</p>
+                         <p><strong>Methodology:</strong> Choose methods based on objectives (e.g., User Interviews, Contextual Inquiry, Surveys, Diary Studies, Analytics Review, Support Ticket Analysis).</p>
+                         <p><strong>Logistics:</strong> Timeline, budget (incentives?), tools, discussion guide/survey instrument.</p>
+                     </div>
+                    <div class="input-group">
+                        <label for="research-plan">Research Objectives & Methods:</label>
+                        <textarea id="research-plan" rows="4" placeholder="Research questions, participant criteria, chosen methods..."></textarea>
+                    </div>
+                     <div class="input-group">
+                        <label for="research-script">Discussion Guide / Survey Instrument:</label>
+                        <textarea id="research-script" rows="6" placeholder="Outline of interview questions (open-ended) or survey structure..."></textarea>
+                    </div>
+                </div>
+
+                <div class="step" data-step-id="1.6" data-step-title="User Research Execution & Synthesis">
+                    <div class="step-header">
+                         <input type="checkbox" id="step-1.6-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-1.6-check"><i class="fa-solid fa-users-gear"></i> 1.6 Research Execution & Synthesis</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-1.6"><i class="fa-solid fa-circle-info"></i></button>
+                     </div>
+                     <div class="tip-content" id="tip-1.6" style="display: none;">
+                         <p><strong>Execution:</strong> Conduct the planned research activities ethically and effectively. Record sessions (with permission), take detailed notes.</p>
+                         <p><strong>Synthesis:</strong> Transcribe/organize raw data. Use methods like Affinity Diagramming (grouping notes by theme), identifying patterns, creating 'How Might We' questions based on insights. Summarize key findings, pain points, needs, motivations, and supporting quotes.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="research-findings">Key Research Findings & Insights:</label>
+                         <textarea id="research-findings" rows="7" placeholder="Summarize major themes, user needs, pain points, motivations, surprising discoveries..."></textarea>
+                     </div>
+                 </div>
+
+                <div class="step" data-step-id="1.7" data-step-title="User Personas">
+                    <div class="step-header">
+                         <input type="checkbox" id="step-1.7-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-1.7-check"><i class="fa-solid fa-user-tag"></i> 1.7 User Personas</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-1.7"><i class="fa-solid fa-circle-info"></i></button>
+                     </div>
+                     <div class="tip-content" id="tip-1.7" style="display: none;">
+                         <p>Create 1-3 fictional yet realistic representations of your primary user segments, *based entirely on research synthesis*. Include: Name, Photo/Archetype, Demographics (relevant ones), Goals & Needs (related to the product), Frustrations/Pain Points, Behaviors & Habits, Tech Savviness, Motivations, Bio/Scenario. Keep them focused and actionable.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="personas">Persona Details (Primary / Secondary):</label>
+                         <textarea id="personas" rows="8" placeholder="Describe your research-backed persona(s) here..."></textarea>
+                     </div>
+                     <div class="input-group artifact-link">
+                        <label for="persona-link"><i class="fa-solid fa-link"></i> Link to Persona Document/Visual:</label>
+                        <input type="url" id="persona-link" placeholder="https://...">
+                     </div>
+                 </div>
+
+                <div class="step" data-step-id="1.8" data-step-title="User Journey Maps / Empathy Maps">
+                     <div class="step-header">
+                         <input type="checkbox" id="step-1.8-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-1.8-check"><i class="fa-solid fa-route"></i> 1.8 Journey Maps / Empathy Maps</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-1.8"><i class="fa-solid fa-circle-info"></i></button>
+                     </div>
+                     <div class="tip-content" id="tip-1.8" style="display: none;">
+                        <p><strong>Journey Map (As-Is):</strong> Visualize the persona's current step-by-step experience trying to achieve their goal without your solution. Map Phases > Actions > Thoughts > Feelings > Pain Points > Opportunities.</p>
+                        <p><strong>Empathy Map:</strong> Focus on a specific persona in a particular situation. Map what they Say, Think, Do, and Feel. Helps build deeper understanding and empathy.</p>
+                    </div>
+                     <div class="input-group">
+                         <label for="journey-map-insights">Journey/Empathy Map Key Insights:</label>
+                         <textarea id="journey-map-insights" rows="6" placeholder="Describe key phases, actions, highs/lows, critical pain points, and opportunities identified..."></textarea>
+                     </div>
+                     <div class="input-group artifact-link">
+                        <label for="journey-map-link"><i class="fa-solid fa-link"></i> Link to Journey Map Visual:</label>
+                        <input type="url" id="journey-map-link" placeholder="https://...">
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="1.9" data-step-title="Heuristic Evaluation" data-optional="true">
+                     <div class="step-header">
+                         <input type="checkbox" id="step-1.9-check" class="step-checkbox" title="Mark as complete">
+                         <h3 class="optional-step"><label for="step-1.9-check"><i class="fa-solid fa-clipboard-check"></i> 1.9 Heuristic Evaluation (Optional)</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-1.9"><i class="fa-solid fa-circle-info"></i></button>
+                     </div>
+                     <div class="tip-content" id="tip-1.9" style="display: none;">
+                         <p>If redesigning an existing product or analyzing competitors closely, evaluate against established usability heuristics (e.g., Nielsen's 10, Shneiderman's 8 Golden Rules). Document violations, provide examples, and rate severity (e.g., cosmetic, minor, major, catastrophic). Helps identify quick wins and areas needing significant change.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="heuristic-findings">Heuristic Evaluation Findings:</label>
+                         <textarea id="heuristic-findings" rows="5" placeholder="List key heuristic violations, examples, severity ratings..."></textarea>
+                     </div>
+                 </div>
+                 <div class="input-group phase-summary">
+                    <label for="phase-1-artifacts"><i class="fa-solid fa-paperclip"></i> Key Artifacts/Links for this Phase:</label>
+                    <textarea id="phase-1-artifacts" class="phase-summary-textarea" rows="3" placeholder="List or link to other relevant documents/outputs for Phase 1..."></textarea>
+                 </div>
+            </section>
+
+            <section id="phase-2" class="phase-section">
+                 <h2 class="phase-title"><i class="fa-solid fa-lightbulb"></i> Phase 2: Ideate & Structure</h2>
+                 <p class="phase-description">Brainstorming solutions, prioritizing features, and defining the information flow and architecture.</p>
+
+                  <div class="step" data-step-id="2.1" data-step-title="Ideation (HMWs, Brainstorming)">
+                    <div class="step-header">
+                        <input type="checkbox" id="step-2.1-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-2.1-check"><i class="fa-solid fa-brain-circuit"></i> 2.1 Ideation (HMWs, Brainstorming)</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-2.1"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-2.1" style="display: none;">
+                         <p>Turn research insights and opportunities into actionable "How Might We..." (HMW) questions. Use these HMWs as prompts for brainstorming sessions (e.g., Crazy 8s, Round Robin, Worst Possible Idea). Generate a large quantity of diverse ideas without initial judgment. Capture everything visually (sketches, notes).</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="ideation-output">HMW Questions & Brainstorming Output:</label>
+                         <textarea id="ideation-output" rows="7" placeholder="List key HMWs and document the raw ideas generated..."></textarea>
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="2.2" data-step-title="Feature Prioritization & MVP Definition">
+                     <div class="step-header">
+                        <input type="checkbox" id="step-2.2-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-2.2-check"><i class="fa-solid fa-list-check"></i> 2.2 Feature Prioritization & MVP Definition</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-2.2"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-2.2" style="display: none;">
+                         <p>Group brainstormed ideas into logical features or epics. Evaluate and prioritize these features using established frameworks:</p>
+                         <ul>
+                             <li><strong>MoSCoW:</strong> Must Have, Should Have, Could Have, Won't Have (for this release).</li>
+                             <li><strong>Value vs. Effort Matrix:</strong> Plot features based on user value and implementation effort (focus on High Value/Low Effort first).</li>
+                             <li><strong>Kano Model:</strong> Categorize features as Basic, Performance, or Delighter.</li>
+                         </ul>
+                         <p>Clearly define the scope for the Minimum Viable Product (MVP) – the core set of features solving the main user problem.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="features-prioritized">Prioritized Feature List & MVP Scope:</label>
+                         <textarea id="features-prioritized" rows="8" placeholder="List features with chosen priority framework (e.g., MoSCoW: Must Have...). Clearly state MVP features..."></textarea>
+                     </div>
+                 </div>
+
+                  <div class="step" data-step-id="2.3" data-step-title="Task Analysis & User Flows">
+                     <div class="step-header">
+                        <input type="checkbox" id="step-2.3-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-2.3-check"><i class="fa-solid fa-diagram-project"></i> 2.3 Task Analysis & User Flows</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-2.3"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                    <div class="tip-content" id="tip-2.3" style="display: none;">
+                         <p>For key features (especially MVP), break down the user's goal into specific, sequential tasks (Task Analysis). Create User Flow diagrams (flowcharts) illustrating the pathways users will take through the interface to complete these tasks. Show screens, decisions, actions, entry/exit points. Consider primary flows ("happy path") and potential alternative/error flows.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="task-analysis">Key Task Analysis:</label>
+                         <textarea id="task-analysis" rows="4" placeholder="Break down primary user tasks into sequential steps..."></textarea>
+                     </div>
+                     <div class="input-group">
+                         <label for="user-flows-notes">User Flow Descriptions:</label>
+                         <textarea id="user-flows-notes" rows="5" placeholder="Describe the core user flows being designed..."></textarea>
+                     </div>
+                      <div class="input-group artifact-link">
+                        <label for="user-flow-link"><i class="fa-solid fa-link"></i> Link to User Flow Diagrams:</label>
+                        <input type="url" id="user-flow-link" placeholder="https://...">
+                     </div>
+                 </div>
+
+                <div class="step" data-step-id="2.4" data-step-title="Storyboarding" data-optional="true">
+                     <div class="step-header">
+                        <input type="checkbox" id="step-2.4-check" class="step-checkbox" title="Mark as complete">
+                         <h3 class="optional-step"><label for="step-2.4-check"><i class="fa-solid fa-film"></i> 2.4 Storyboarding (Optional)</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-2.4"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-2.4" style="display: none;">
+                         <p>Create visual narratives (like comic strips) showing a persona using the product in a specific context to achieve their goal. Include panels showing the situation, user actions, interface interactions, and user's emotional response. Helps communicate the intended experience and context of use.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="storyboard-desc">Storyboard Summary / Link:</label>
+                         <textarea id="storyboard-desc" rows="5" placeholder="Describe scenario depicted or link to storyboard visuals..."></textarea>
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="2.5" data-step-title="Information Architecture (IA)">
+                    <div class="step-header">
+                        <input type="checkbox" id="step-2.5-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-2.5-check"><i class="fa-solid fa-sitemap"></i> 2.5 Information Architecture (IA)</label></h3>
+                          <button class="tip-toggle-btn" data-tip-target="tip-2.5"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-2.5" style="display: none;">
+                         <p>Define how information and features are organized, structured, and labeled to support usability and findability. Methods:</p>
+                         <ul>
+                            <li><strong>Content Inventory/Audit:</strong> List existing content (if redesigning).</li>
+                            <li><strong>Card Sorting (Open/Closed):</strong> Ask users to group content/features to understand their mental models.</li>
+                            <li><strong>Sitemap:</strong> Create a hierarchical diagram showing the structure of pages/screens and their relationships.</li>
+                            <li><strong>Navigation Design:</strong> Plan primary, secondary, and utility navigation systems.</li>
+                         </ul>
+                    </div>
+                    <div class="input-group">
+                         <label for="ia-methods-notes">IA Methods Used & Insights:</label>
+                         <textarea id="ia-methods-notes" rows="4" placeholder="Describe methods like card sorting, content inventory, and key insights gained..."></textarea>
+                     </div>
+                     <div class="input-group">
+                         <label for="sitemap-desc">Sitemap Description:</label>
+                         <textarea id="sitemap-desc" rows="5" placeholder="Outline the main sections and navigation hierarchy..."></textarea>
+                     </div>
+                     <div class="input-group artifact-link">
+                        <label for="sitemap-link"><i class="fa-solid fa-link"></i> Link to Sitemap Visual:</label>
+                        <input type="url" id="sitemap-link" placeholder="https://...">
+                     </div>
+                 </div>
+                 <div class="input-group phase-summary">
+                    <label for="phase-2-artifacts"><i class="fa-solid fa-paperclip"></i> Key Artifacts/Links for this Phase:</label>
+                    <textarea id="phase-2-artifacts" class="phase-summary-textarea" rows="3" placeholder="List or link to other relevant documents/outputs for Phase 2..."></textarea>
+                 </div>
+            </section>
+
+            <section id="phase-3" class="phase-section">
+                 <h2 class="phase-title"><i class="fa-solid fa-pen-ruler"></i> Phase 3: Design & Prototype</h2>
+                 <p class="phase-description">Translating architecture and flows into tangible interfaces and interactive experiences.</p>
+
+                  <div class="step" data-step-id="3.1" data-step-title="Sketching & Lo-Fi Wireframes">
+                    <div class="step-header">
+                        <input type="checkbox" id="step-3.1-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-3.1-check"><i class="fa-solid fa-pencil"></i> 3.1 Sketching & Lo-Fi Wireframes</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-3.1"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                    <div class="tip-content" id="tip-3.1" style="display: none;">
+                         <p>Rapidly visualize different layout concepts for key screens identified in user flows and IA. Use paper sketches, whiteboards, or simple digital tools (e.g., Balsamiq, Excalidraw). Focus on basic structure, content placement, key UI elements, and flow. Don't worry about aesthetics. Iterate quickly based on peer feedback or self-critique.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="sketches-desc">Sketching / Lo-Fi Insights & Links:</label>
+                         <textarea id="sketches-desc" rows="5" placeholder="Describe key layout explorations, decisions made, or link to sketch images/files..."></textarea>
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="3.2" data-step-title="Mid-Fidelity Wireframes">
+                     <div class="step-header">
+                        <input type="checkbox" id="step-3.2-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-3.2-check"><i class="fa-solid fa-object-ungroup"></i> 3.2 Mid-Fidelity Wireframes</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-3.2"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-3.2" style="display: none;">
+                         <p>Translate selected lo-fi concepts into more detailed digital wireframes using tools like Figma, Sketch, or XD. Use grayscale and placeholder content (or realistic if available). Focus on accurate layout, spacing, content hierarchy, UI element types (buttons, forms), basic information architecture, and interactions. Annotate where necessary to explain functionality.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="wireframes-notes">Mid-Fidelity Wireframe Notes:</label>
+                         <textarea id="wireframes-notes" rows="5" placeholder="Describe key screens wireframed, specific UI patterns used, annotations..."></textarea>
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="3.3" data-step-title="Wireframe Prototyping & Testing">
+                    <div class="step-header">
+                        <input type="checkbox" id="step-3.3-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-3.3-check"><i class="fa-solid fa-person-chalkboard"></i> 3.3 Wireframe Prototyping & Testing</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-3.3"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-3.3" style="display: none;">
+                         <p>Connect the mid-fidelity wireframe screens to create a clickable prototype simulating key user flows. Conduct usability testing with 3-5 target users. Focus on task completion, navigation effectiveness, clarity of information architecture, and identifying major usability issues *before* investing in visual design. Iterate on wireframes based on findings.</p>
+                     </div>
+                     <div class="input-group artifact-link">
+                         <label for="proto-wireframe-link"><i class="fa-solid fa-link"></i> Link to Wireframes/Prototype (Lo-fi/Mid-fi):</label>
+                         <input type="url" id="proto-wireframe-link" placeholder="https://...">
+                     </div>
+                      <div class="input-group">
+                         <label for="wireframe-test-findings">Wireframe Testing Findings & Iterations:</label>
+                         <textarea id="wireframe-test-findings" rows="5" placeholder="Summarize key usability issues found during wireframe testing and describe the design changes made..."></textarea>
+                     </div>
+                 </div>
+
+                <div class="step" data-step-id="3.4" data-step-title="Visual Design Exploration">
+                     <div class="step-header">
+                         <input type="checkbox" id="step-3.4-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-3.4-check"><i class="fa-solid fa-wand-sparkles"></i> 3.4 Visual Design Exploration</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-3.4"><i class="fa-solid fa-circle-info"></i></button>
+                     </div>
+                     <div class="tip-content" id="tip-3.4" style="display: none;">
+                         <p>Define the visual identity and aesthetic direction. Gather inspiration (screenshots, photos, existing UIs) aligned with brand attributes and target audience preferences. Create mood boards to communicate look and feel. Explore different style tiles (combinations of color, typography, imagery, icons) for key UI elements.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="moodboard-desc">Mood Board / Style Exploration Summary:</label>
+                         <textarea id="moodboard-desc" rows="5" placeholder="Describe visual direction, brand keywords (e.g., clean, friendly, sophisticated), link to mood board..."></textarea>
+                     </div>
+                 </div>
+
+                  <div class="step" data-step-id="3.5" data-step-title="UI Style Guide & Design System">
+                     <div class="step-header">
+                         <input type="checkbox" id="step-3.5-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-3.5-check"><i class="fa-solid fa-book-bookmark"></i> 3.5 UI Style Guide & Design System</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-3.5"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-3.5" style="display: none;">
+                         <p>Formalize the visual and interactive elements into a reusable system. Define: Color palettes (primary, secondary, semantic, neutrals), typography scale (headings, body, captions), iconography library, grid layout, spacing system (e.g., 8pt grid), reusable components (buttons, inputs, cards, modals) with variants and states (hover, focus, disabled). Prioritize consistency and accessibility (WCAG AA minimum).</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="style-guide-notes">Style Guide / Design System Notes:</label>
+                         <textarea id="style-guide-notes" rows="6" placeholder="Document key decisions on colors, typography, spacing, components..."></textarea>
+                     </div>
+                      <div class="input-group artifact-link">
+                        <label for="style-guide-link"><i class="fa-solid fa-link"></i> Link to Style Guide/Component Library:</label>
+                        <input type="url" id="style-guide-link" placeholder="https://...">
+                     </div>
+                 </div>
+
+                <div class="step" data-step-id="3.6" data-step-title="High-Fidelity UI Design">
+                    <div class="step-header">
+                         <input type="checkbox" id="step-3.6-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-3.6-check"><i class="fa-solid fa-mobile-screen-button"></i> 3.6 High-Fidelity UI Design</label></h3>
+                          <button class="tip-toggle-btn" data-tip-target="tip-3.6"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-3.6" style="display: none;">
+                         <p>Apply the established style guide and components to the iterated wireframes. Create pixel-perfect mockups for all necessary screens, including different states (empty, loading, error, success) and responsive variations. Focus on visual hierarchy, clarity, aesthetic appeal, and adherence to design principles. Use realistic content where possible.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="hifi-notes">High-Fidelity Design Notes:</label>
+                         <textarea id="hifi-notes" rows="5" placeholder="Describe key screens designed, challenges, specific visual treatments..."></textarea>
+                     </div>
+                 </div>
+
+                  <div class="step" data-step-id="3.7" data-step-title="Interaction Design & High-Fidelity Prototyping">
+                    <div class="step-header">
+                        <input type="checkbox" id="step-3.7-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-3.7-check"><i class="fa-solid fa-wand-magic-sparkles"></i> 3.7 Interaction Design & Hi-Fi Prototype</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-3.7"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-3.7" style="display: none;">
+                         <p>Define how users interact with UI elements. Specify transitions between screens, micro-interactions (e.g., button feedback, loading spinners), animations, and gestures (for mobile). Build a high-fidelity prototype (using Figma, Protopie, etc.) that accurately simulates these interactions for testing and presentation.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="interaction-notes">Key Interaction & Animation Notes:</label>
+                         <textarea id="interaction-notes" rows="4" placeholder="Describe significant transitions, micro-interactions, animations defined..."></textarea>
+                     </div>
+                     <div class="input-group artifact-link">
+                         <label for="proto-hifi-link"><i class="fa-solid fa-link"></i> Link to Hi-Fi Mockups/Prototype:</label>
+                         <input type="url" id="proto-hifi-link" placeholder="https://...">
+                     </div>
+                 </div>
+
+                  <div class="step" data-step-id="3.8" data-step-title="Accessibility Review">
+                     <div class="step-header">
+                        <input type="checkbox" id="step-3.8-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-3.8-check"><i class="fa-solid fa-universal-access"></i> 3.8 Accessibility Review</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-3.8"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                    <div class="tip-content" id="tip-3.8" style="display: none;">
+                         <p>Systematically review high-fidelity designs against Web Content Accessibility Guidelines (WCAG) AA standards. Check for sufficient color contrast, readable font sizes, adequate touch target sizes, clear focus indicators, logical content order (for screen readers), and appropriate labeling for interactive elements. Use automated tools and manual checks.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="accessibility-notes">Accessibility Review Findings & Fixes:</label>
+                         <textarea id="accessibility-notes" rows="5" placeholder="Summarize checks performed, issues identified (e.g., contrast failures), and actions taken..."></textarea>
+                     </div>
+                 </div>
+                 <div class="input-group phase-summary">
+                    <label for="phase-3-artifacts"><i class="fa-solid fa-paperclip"></i> Key Artifacts/Links for this Phase:</label>
+                    <textarea id="phase-3-artifacts" class="phase-summary-textarea" rows="3" placeholder="List or link to other relevant documents/outputs for Phase 3..."></textarea>
+                 </div>
+            </section>
+
+            <section id="phase-4" class="phase-section">
+                <h2 class="phase-title"><i class="fa-solid fa-vial-circle-check"></i> Phase 4: Test & Iterate</h2>
+                 <p class="phase-description">Validating the high-fidelity design with real users and refining based on empirical data.</p>
+
+                 <div class="step" data-step-id="4.1" data-step-title="Usability Testing Plan (Summative)">
+                    <div class="step-header">
+                        <input type="checkbox" id="step-4.1-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-4.1-check"><i class="fa-solid fa-clipboard-question"></i> 4.1 Usability Testing Plan (Summative)</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-4.1"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                      <div class="tip-content" id="tip-4.1" style="display: none;">
+                         <p>Plan the main usability test for the high-fidelity prototype. Define: Clear objectives (e.g., Can users complete core tasks efficiently? Are interactions intuitive?), participant criteria (recruit ~5-8 users per segment), realistic task scenarios, key metrics (Task Success Rate, Time on Task, Error Rate, SEQ/SUS scores), testing environment (moderated/unmoderated, remote/in-person), and a detailed facilitator script.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="test-plan">Summative Test Plan Details:</label>
+                         <textarea id="test-plan" rows="6" placeholder="Outline objectives, participants, tasks, metrics, logistics for hi-fi testing..."></textarea>
+                     </div>
+                      <div class="input-group">
+                         <label for="test-script">Test Script / Tasks (Summative):</label>
+                         <textarea id="test-script" rows="5" placeholder="Key scenarios, task instructions, probing questions, post-test questionnaire..."></textarea>
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="4.2" data-step-title="Conduct Usability Testing (Summative)">
+                    <div class="step-header">
+                         <input type="checkbox" id="step-4.2-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-4.2-check"><i class="fa-solid fa-people-group"></i> 4.2 Conduct Usability Testing (Summative)</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-4.2"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-4.2" style="display: none;">
+                         <p>Execute the planned usability tests. Ensure consistent facilitation if moderated. Encourage users to think aloud. Observe behavior closely and record quantitative metrics (success, time, errors) and qualitative feedback (comments, confusion points, body language). Collect satisfaction scores (SEQ, SUS).</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="test-conduct-notes">Testing Execution Notes:</label>
+                         <textarea id="test-conduct-notes" rows="4" placeholder="Details on participants recruited, sessions completed, observations during testing..."></textarea>
+                     </div>
+                     <div class="input-group artifact-link">
+                        <label for="test-report-link"><i class="fa-solid fa-link"></i> Link to Usability Test Report/Videos:</label>
+                        <input type="url" id="test-report-link" placeholder="https://...">
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="4.3" data-step-title="Analyze Findings & Prioritize Revisions">
+                     <div class="step-header">
+                         <input type="checkbox" id="step-4.3-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-4.3-check"><i class="fa-solid fa-magnifying-glass-chart"></i> 4.3 Analyze Findings & Prioritize Revisions</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-4.3"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                      <div class="tip-content" id="tip-4.3" style="display: none;">
+                         <p>Systematically analyze both quantitative (metrics) and qualitative (observations, quotes) data from testing. Use frameworks like Rainbow Spreadsheet or thematic analysis to identify recurring usability issues, friction points, and areas of success. Prioritize issues based on severity (impact on task completion, user frustration) and frequency. Use a severity scale (e.g., 0-4).</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="test-findings">Key Findings, Metrics & Prioritized Issues:</label>
+                         <textarea id="test-findings" rows="8" placeholder="Summarize quantitative results (SUS, Task Success %), qualitative themes, and list prioritized issues with severity ratings..."></textarea>
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="4.4" data-step-title="Iterate on Design & Validate Changes">
+                    <div class="step-header">
+                         <input type="checkbox" id="step-4.4-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-4.4-check"><i class="fa-solid fa-arrows-rotate"></i> 4.4 Iterate on Design & Validate Changes</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-4.4"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-4.4" style="display: none;">
+                        <p>Implement design changes to address the prioritized usability issues in the high-fidelity designs and prototype. Document these iterations clearly (e.g., using "Before/After" comparisons, explaining the rationale based on test findings). If major changes were made, consider conducting quick validation testing on those specific areas with a few users to ensure the fix is effective.</p>
+                    </div>
+                     <div class="input-group">
+                         <label for="iterations-desc">Design Iterations & Rationale:</label>
+                         <textarea id="iterations-desc" rows="8" placeholder="Describe changes made, show before/after if possible, explain why based on test data, note any validation performed..."></textarea>
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="4.5" data-step-title="A/B Testing Execution & Analysis" data-optional="true">
+                     <div class="step-header">
+                        <input type="checkbox" id="step-4.5-check" class="step-checkbox" title="Mark as complete">
+                         <h3 class="optional-step"><label for="step-4.5-check"><i class="fa-solid fa-code-compare"></i> 4.5 A/B Testing Execution & Analysis (Opt)</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-4.5"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                    <div class="tip-content" id="tip-4.5" style="display: none;">
+                         <p>If an A/B test was planned, implement the variations and launch the test using appropriate tools (e.g., Google Optimize, Optimizely). Monitor results until statistical significance is reached for the primary metric. Analyze the data to determine the winning variation and document the outcome and learnings.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="ab-test-results">A/B Test Results & Conclusions:</label>
+                         <textarea id="ab-test-results" rows="5" placeholder="Summarize the results, statistical significance, winning variation, and key takeaways from the A/B test..."></textarea>
+                     </div>
+                 </div>
+                 <div class="input-group phase-summary">
+                    <label for="phase-4-artifacts"><i class="fa-solid fa-paperclip"></i> Key Artifacts/Links for this Phase:</label>
+                    <textarea id="phase-4-artifacts" class="phase-summary-textarea" rows="3" placeholder="List or link to other relevant documents/outputs for Phase 4..."></textarea>
+                 </div>
+            </section>
+
+            <section id="phase-5" class="phase-section">
+                <h2 class="phase-title"><i class="fa-solid fa-file-arrow-up"></i> Phase 5: Finalize & Present</h2>
+                 <p class="phase-description">Preparing final deliverables, documenting for handoff, and showcasing the project impact.</p>
+
+                 <div class="step" data-step-id="5.1" data-step-title="Final UI Polish & Asset Preparation">
+                     <div class="step-header">
+                         <input type="checkbox" id="step-5.1-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-5.1-check"><i class="fa-solid fa-wand-magic-sparkles"></i> 5.1 Final UI Polish & Asset Preparation</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-5.1"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-5.1" style="display: none;">
+                         <p>Perform meticulous final checks on all iterated UI screens across different breakpoints/states. Ensure pixel-perfect alignment, consistent application of the design system, final accessibility compliance, and overall visual refinement. Prepare and export all necessary graphical assets (icons, illustrations, images) in the required formats and resolutions for development.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="final-ui-notes">Final Polish & Asset Prep Notes:</label>
+                         <textarea id="final-ui-notes" rows="4" placeholder="Notes on final consistency checks, asset organization, export settings..."></textarea>
+                     </div>
+                 </div>
+
+                  <div class="step" data-step-id="5.2" data-step-title="Design Specifications & Handoff">
+                     <div class="step-header">
+                         <input type="checkbox" id="step-5.2-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-5.2-check"><i class="fa-solid fa-file-invoice"></i> 5.2 Design Specifications & Handoff</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-5.2"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                     <div class="tip-content" id="tip-5.2" style="display: none;">
+                         <p>Create comprehensive documentation for the development team to ensure accurate implementation. This typically includes: Final interactive prototype, link to the design system/style guide, detailed specs for components (measurements, typography, colors, states), interaction guidelines (animations, transitions), annotated mockups for complex screens, and user flow diagrams. Use tools like Zeplin, Figma Dev Mode, or create a dedicated spec document.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="handoff-notes">Handoff Documentation Notes:</label>
+                         <textarea id="handoff-notes" rows="5" placeholder="Describe the contents of the handoff package, tools used..."></textarea>
+                     </div>
+                      <div class="input-group artifact-link">
+                        <label for="design-specs-link"><i class="fa-solid fa-link"></i> Link to Final Design Specs:</label>
+                        <input type="url" id="design-specs-link" placeholder="e.g., Zeplin link, Figma Dev Mode link...">
+                     </div>
+                 </div>
+
+                 <div class="step" data-step-id="5.3" data-step-title="Portfolio Case Study Creation">
+                     <div class="step-header">
+                         <input type="checkbox" id="step-5.3-check" class="step-checkbox" title="Mark as complete">
+                         <h3><label for="step-5.3-check"><i class="fa-solid fa-presentation-screen"></i> 5.3 Portfolio Case Study Creation</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-5.3"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                    <div class="tip-content" id="tip-5.3" style="display: none;">
+                         <p>Craft a compelling story showcasing your design process, decisions, and the project's impact. Structure: 1. Overview (Hook, project summary, your role). 2. Problem (User needs, business context). 3. Goals (What success looked like). 4. Process & Approach (Outline steps taken). 5. Research (Key insights, personas). 6. Ideation & Design (Flows, wires, visual design evolution). 7. Testing & Iteration (Show findings and *how design changed* - crucial!). 8. Final Solution (Showcase polished UI/prototype). 9. Results & Impact (Connect back to goals, metrics). 10. Reflection (Learnings, challenges). Use high-quality visuals!</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="case-study-outline">Case Study Narrative Outline:</label>
+                         <textarea id="case-study-outline" rows="10" placeholder="Outline the story, key visuals, data points, and takeaways for each case study section..."></textarea>
+                     </div>
+                     <div class="input-group artifact-link">
+                        <label for="case-study-link"><i class="fa-solid fa-link"></i> Link to Published Case Study:</label>
+                        <input type="url" id="case-study-link" placeholder="https://yourportfolio.com/...">
+                    </div>
+                 </div>
+
+                 <div class="step" data-step-id="5.4" data-step-title="Post-Launch Analysis & Future Steps" data-optional="true">
+                     <div class="step-header">
+                        <input type="checkbox" id="step-5.4-check" class="step-checkbox" title="Mark as complete">
+                         <h3 class="optional-step"><label for="step-5.4-check"><i class="fa-solid fa-chart-line"></i> 5.4 Post-Launch Analysis & Future (Opt)</label></h3>
+                         <button class="tip-toggle-btn" data-tip-target="tip-5.4"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                    <div class="tip-content" id="tip-5.4" style="display: none;">
+                         <p>For real-world projects: After launch, collaborate with product/dev teams to monitor key metrics defined earlier (analytics, feedback channels, support tickets). Analyze performance against goals. Identify areas for future improvement or iteration based on real-world usage data. Plan next steps for the product roadmap.</p>
+                     </div>
+                     <div class="input-group">
+                         <label for="post-launch-plan">Post-Launch Analysis Plan & Findings:</label>
+                         <textarea id="post-launch-plan" rows="5" placeholder="Outline metrics tracked, key findings from post-launch data, and potential next steps..."></textarea>
+                     </div>
+                 </div>
+                 <div class="input-group phase-summary">
+                    <label for="phase-5-artifacts"><i class="fa-solid fa-paperclip"></i> Key Artifacts/Links for this Phase:</label>
+                    <textarea id="phase-5-artifacts" class="phase-summary-textarea" rows="3" placeholder="List or link to other relevant documents/outputs for Phase 5..."></textarea>
+                 </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
